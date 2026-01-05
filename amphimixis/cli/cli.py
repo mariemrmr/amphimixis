@@ -7,9 +7,20 @@ from amphimixis import general
 class CLI(general.IUI):
     """CLI class implementing IUI interface"""
 
-    def print(self, message: str) -> None:
+    def print(self) -> None:
         """Print message to the console
 
         :param str message: Message to print to the console"""
 
-        print(message)
+    def update_message(self, message: str, build_id: str) -> None:
+        """Update message for specific build
+
+        :param str message: Message to store
+        :param str build_id: Build identifier
+        """
+
+    def step(self, build_id: str) -> None:
+        """Advance the progress counter by one step
+
+        :param str build_id: Build identifier
+        """
