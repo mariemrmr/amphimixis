@@ -99,7 +99,6 @@ def parse_config(
     with open(config_path, "wb") as file:
         pickle.dump(project, file)
 
-    ui.mark_success()
     _logger.info("Configuration completed successfully!")
     return True
 
