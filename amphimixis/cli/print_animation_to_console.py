@@ -2,9 +2,11 @@
 
 import sys
 
+from amphimixis.general import IUI
 
-class ProgressTracker:
-    """Spinner for progress to user"""
+
+class PrintAnimationToConsole(IUI):
+    """Single-line console spinner implementation of IUI."""
 
     braille: list[str] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
     build_id: str
@@ -18,7 +20,7 @@ class ProgressTracker:
         self.message = ""
         self.status = "running"
 
-    def update_message_and_build_id(self, build_id: str, message: str) -> None:
+    def update_message(self, build_id: str, message: str) -> None:
         """Update build_id and message.
 
         :param str build_id: Build identifier
@@ -27,38 +29,39 @@ class ProgressTracker:
 
         self.build_id = build_id
         self.message = message
+        self.draw()
 
-    def next(self) -> None:
+    def step(self) -> None:
         """Move to next spinner."""
 
         self.index = (self.index + 1) % len(self.braille)
+        self.draw()
 
-    def mark_success(self, message: str = "Success!") -> None:
-        """Mark as successful and optionally update message.
-
-        :param str message: Message to display for successful build
-        """
+    def mark_success(self) -> None:
+        """Mark as successful and optionally update message."""
 
         self.status = "success"
-        self.message = message
+        self.message = "Success!"
+        self.draw()
+        self.finalize()
 
-    def mark_failed(self, message: str = "Failed!") -> None:
+    def mark_failed(self, error_message: str = "Failed!") -> None:
         """Mark as failed and optionally update message.
 
-        :param str message: Message to display for failed build
+        :param str error_message: Message to display for failed build
         """
 
         self.status = "failed"
-        self.message = message
+        if error_message == "":
+            self.message = "Failed!"
+        else:
+            self.message = error_message
 
-    def clear(self) -> None:
-        """Clear the spinner line."""
-
-        sys.stdout.write("\r" + " " * 120 + "\r")
-        sys.stdout.flush()
+        self.draw()
+        self.finalize()
 
     def draw(self) -> None:
-        """Render current state to stdout."""
+        """Draw current state to stdout."""
 
         if self.status == "success":
             symbol = "✓"
@@ -68,10 +71,8 @@ class ProgressTracker:
             symbol = self.braille[self.index]
 
         sys.stdout.write(f"\r[{self.build_id}][{symbol}] {self.message}")
-        sys.stdout.flush()
 
     def finalize(self) -> None:
         """Move to next line."""
 
         sys.stdout.write("\n")
-        sys.stdout.flush()
