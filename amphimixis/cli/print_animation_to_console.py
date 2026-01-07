@@ -26,6 +26,7 @@ class PrintAnimationToConsole(IUI):
         :param str build_id: Build identifier
         :param str message: Message describing current build phase
         """
+
         if self.build_id != build_id:
             self.status = "running"
             self.index = 0
@@ -41,7 +42,7 @@ class PrintAnimationToConsole(IUI):
         self.draw()
 
     def mark_success(self, message: str = "") -> None:
-        """Mark as successful and optionally update message."""
+        """Mark as successful."""
 
         self.status = "success"
         if message == "":
@@ -77,7 +78,7 @@ class PrintAnimationToConsole(IUI):
         else:
             symbol = self.braille[self.index]
 
-        sys.stdout.write(f"\r[{self.build_id}][{symbol}] {self.message}")
+        sys.stdout.write(f"\r\033[K[{self.build_id}][{symbol}] {self.message}")
         sys.stdout.flush()
 
     def finalize(self) -> None:
