@@ -30,6 +30,7 @@ jobs:
               fi
           fi
 
+<<<<<<< HEAD
           if [ ! -f /usr/libexec/perf-core/perf-archive ]; then
               sudo mkdir -p /usr/libexec/perf-core
               curl -s https://raw.githubusercontent.com/torvalds/linux/master/tools/perf/perf-archive.sh | sudo tee /usr/libexec/perf-core/perf-archive
@@ -130,3 +131,17 @@ jobs:
           include-hidden-files: true
           path: |
             /tmp/test_workspace_*
+=======
+        perf --version
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v6
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Run CI
+      run: |
+        echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
+        sudo apt install ruby-mdl qemu-system-riscv64 u-boot-qemu xz-utils sshpass
+        ci/runner.sh
+>>>>>>> e159246 (fix(ci): fix installing xz in ci/yml)
