@@ -141,9 +141,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Run CI
       run: |
-        echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
         sudo apt update
+        echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
         sudo apt install -y ruby-mdl u-boot-qemu xz-utils sshpass
-        sudo apt install -y qemu-system-riscv qemu-utils
+        sudo apt install -y qemu-system qemu-utils
         ci/runner.sh
 >>>>>>> e159246 (fix(ci): fix installing xz in ci/yml)
