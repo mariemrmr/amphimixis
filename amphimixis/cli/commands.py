@@ -17,6 +17,7 @@ def run_analyze(project: general.Project, ui: IUI = NullUI()) -> bool:
     :param Project project: Project instance to analyze
     :param IUI ui: User interface for progress display
     """
+
     project_name = path.basename(path.normpath(project.path))
     ui.update_message(project_name, "Analyzing project...")
 

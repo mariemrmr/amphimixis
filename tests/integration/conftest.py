@@ -53,6 +53,22 @@ def create_working_space():
 
 
 @pytest.fixture
+def create_file():
+    """Create temporary files with automatic cleanup."""
+    files = []
+
+    def create_file_(name_file: str, text_file: str, directory: Path):
+        program_file_path = directory / name_file
+        program_file_path.write_text(text_file, encoding="utf-8")
+
+    yield create_file_
+
+    for f in files:
+        if f.exists():
+            f.unlink()
+
+
+@pytest.fixture
 def _docker_compose():
     """Run Docker Compose for integration tests.
     Comment out the line 'compose.stop()' if you don't want the containers to be deleted.
