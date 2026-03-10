@@ -97,11 +97,11 @@ def riscv_vm_run_and_install_packages():
         "virtio-rng-device,rng=rng",
         "-nographic",
         "-append",
-        "root=LABEL=rootfs rw noquiet root=LABEL=rootfs norelocate console=ttyS0",
+        "root=LABEL=rootfs rw noquiet norelocate FDT /boot/riscv64.dtb console=ttyS0",
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
-    time.sleep(60)
+    time.sleep(90)
 
     if process.returncode != 0:
         print("Failed to set up the VM")
