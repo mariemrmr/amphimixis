@@ -97,7 +97,7 @@ def riscv_vm_run_and_install_packages():
         "virtio-rng-device,rng=rng",
         "-nographic",
         "-append",
-        "root=LABEL=rootfs rw noquiet norelocate FDT /boot/riscv64.dtb console=ttyS0",
+        "root=LABEL=rootfs rw noquiet norelocate fdt_high=0xffffffff mem=512M console=ttyS0",
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
@@ -114,11 +114,6 @@ def riscv_vm_run_and_install_packages():
         capture_output=True,
         text=True,
     )
-
-    if process.returncode != 0:
-        print("Failed to set up the VM")
-    else:
-        print("Successful setting up the VM")
 
     vm_update_cmd = "apt-get update"
     vm_install_packages = "apt-get install -y cmake make g++ linux-perf"
