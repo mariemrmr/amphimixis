@@ -18,8 +18,7 @@ IP_ADDRESS = "127.0.0.1"
 USERNAME = "root"
 PASSWORD = "root"
 WORKDIR = "/tmp/riscv_vm_test"
-TESTING_PROJECT_URL = "https://github.com/Microsoft/vcpkg.git"
-CONFIG_FLAGS = ""
+TESTING_PROJECT_URL = "https://github.com/leethomason/tinyxml2.git"
 
 
 @pytest.mark.integration
@@ -53,23 +52,16 @@ def test_e2e_riscv_vm(riscv_vm_run_and_install_packages):
 @pytest.fixture
 def riscv_vm_run_and_install_packages():
     """Fixture to start and configure RISC-V QEMU virtual machine."""
+
     Path(WORKDIR).mkdir(parents=True, exist_ok=True)
     xz_file = Path(WORKDIR) / "image.qcow2.xz"
     qcow2_file = Path(WORKDIR) / "image.qcow2"
 
+    url = "https://s3.cloud.ru/qemu-riscv64-debian/image.qcow2.xz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=86d0f13a-77a6-426b-9ab9-3d64072c2c51%3Ac88ebc3d71c1674f11357a0e2331244a%2F20260309%2Fru-central-1%2Fs3%2Faws4_request&X-Amz-Date=20260309T194747Z&X-Amz-Expires=604800&X-Amz-Signature=bc4b08f454cb3d4a152bac1a2f53b2a5c792ba3faae624a45291c10a40a66bf8&X-Amz-SignedHeaders=host&response-content-disposition=attachment&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+
     if not qcow2_file.exists():
         if not xz_file.exists():
-            subprocess.run(
-                [
-                    "cp",
-                    str(
-                        Path(__file__).resolve().parents[2]
-                        / "vm_image"
-                        / "image.qcow2.xz"
-                    ),
-                    str(xz_file),
-                ]
-            )
+            subprocess.run(["wget", "-O", str(xz_file), f"{url}"])
         subprocess.run(["xz", "-d", str(xz_file)], check=True)
 
     kernel = "/usr/lib/u-boot/qemu-riscv64_smode/uboot.elf"
@@ -167,7 +159,7 @@ def _create_input_yaml() -> dict:
         "recipes": [
             {
                 "id": 1,
-                "config_flags": CONFIG_FLAGS,
+                "config_flags": "",
                 "compiler_flags": {"cxx_flags": "-O2"},
             }
         ],
