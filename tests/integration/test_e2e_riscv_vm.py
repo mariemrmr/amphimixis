@@ -78,7 +78,7 @@ def riscv_vm_run_and_install_packages():
         "-cpu",
         "rv64",
         "-m",
-        "256M",
+        "512M",
         "-device",
         "virtio-blk-device,drive=hd",
         "-drive",
@@ -97,7 +97,7 @@ def riscv_vm_run_and_install_packages():
         "virtio-rng-device,rng=rng",
         "-nographic",
         "-append",
-        "root=LABEL=rootfs console=ttyS0",
+        "root=LABEL=rootfs rw noquiet root=LABEL=rootfs norelocate console=ttyS0",
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
