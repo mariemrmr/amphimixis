@@ -101,7 +101,13 @@ def riscv_vm_run_and_install_packages():
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
-    time.sleep(90)
+    time.sleep(60)
+
+    if process.returncode != 0:
+        print("Failed to set up the VM")
+    else:
+        print("Successful setting up the VM")
+
     subprocess.run(
         [
             "ssh-keygen",
@@ -112,7 +118,7 @@ def riscv_vm_run_and_install_packages():
         ],
         capture_output=True,
         text=True,
-    ).returncode
+    )
 
     if process.returncode != 0:
         print("Failed to set up the VM")
