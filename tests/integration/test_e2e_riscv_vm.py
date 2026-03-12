@@ -97,7 +97,7 @@ def riscv_vm_run_and_install_packages():
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
-    time.sleep(60)
+    time.sleep(90)
 
     subprocess.run(
         [
