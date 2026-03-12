@@ -97,7 +97,7 @@ def riscv_vm_run_and_install_packages():
     ]
 
     process = subprocess.Popen(qemu_cmd, text=True)
-    time.sleep(90)
+    time.sleep(120)
 
     subprocess.run(
         [
@@ -114,9 +114,9 @@ def riscv_vm_run_and_install_packages():
     vm_update_cmd = "apt-get update"
     vm_install_packages = "apt-get install -y cmake make g++ linux-perf"
     run_command(str(vm_update_cmd))
-    time.sleep(30)
+    time.sleep(60)
     run_command(str(vm_install_packages))
-    time.sleep(90)
+    time.sleep(120)
 
     yield process
     process.terminate()
