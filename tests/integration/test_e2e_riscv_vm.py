@@ -155,7 +155,7 @@ def wait_for_ssh(port: int = 2222, max_retries: int = 30, delay: int = 5) -> Non
 
         time.sleep(delay)
 
-    raise RuntimeError(f"SSH not available")
+    raise RuntimeError("SSH not available")
 
 
 def run_command(command: str) -> int:
