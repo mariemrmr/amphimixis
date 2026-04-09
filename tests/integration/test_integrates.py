@@ -53,12 +53,9 @@ def test_between_configurator_and_builder(
         None,
     )
 
-    project = general.Project(
-        str(project_dir),
-        [build],
-        amphimixis.build_systems_dict["cmake"],
-        amphimixis.build_systems_dict["make"],
-    )
+    project = general.Project(str(project_dir), [build])
+    runner = amphimixis.build_systems_dict["cmake"][1][0](project)
+    project.build_system = amphimixis.build_systems_dict["cmake"][0](project, runner)
 
     orig_dir = Path.cwd()
     try:

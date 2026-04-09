@@ -6,6 +6,7 @@ a RISC-V VM, installation of dependencies, and runs amphimixis to compile a test
 """
 
 import os
+import socket
 import subprocess
 import tempfile
 import time
@@ -98,38 +99,71 @@ def riscv_vm_run_and_install_packages():
         str(initrd),
     ]
 
-    process = subprocess.Popen(qemu_cmd, text=True)
-    time.sleep(120)
-
-    subprocess.run(
-        [
-            "ssh-keygen",
-            "-f",
-            "~/.ssh/known_hosts",
-            "-R",
-            f"[{IP_ADDRESS}]:2222",
-        ],
-        capture_output=True,
-        text=True,
+    process = subprocess.Popen(
+        qemu_cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
     )
 
+    wait_for_ssh(max_retries=60, delay=5)
+
     vm_update_cmd = "apt-get update"
-    vm_install_packages = "apt-get install -y cmake make g++ linux-perf"
-    run_command(str(vm_update_cmd))
-    time.sleep(60)
-    run_command(str(vm_install_packages))
-    time.sleep(120)
+    vm_install_packages = "apt-get install -y cmake make g++ linux-perf time"
+
+    exit_code = run_command(str(vm_update_cmd))
+    assert exit_code == 0
+
+    exit_code = run_command(str(vm_install_packages))
+    assert exit_code == 0
 
     yield process
     process.terminate()
 
 
-def run_command(command: str) -> None:
+def wait_for_ssh(port: int = 2222, max_retries: int = 30, delay: int = 5) -> None:
+    """Wait for SSH to become available on the VM."""
+
+    for attempt in range(max_retries):
+        try:
+            with socket.create_connection((IP_ADDRESS, port), timeout=5):
+                result = subprocess.run(
+                    [
+                        "sshpass",
+                        "-p",
+                        PASSWORD,
+                        "ssh",
+                        "-o",
+                        "StrictHostKeyChecking=no",
+                        "-o",
+                        "ConnectTimeout=5",
+                        "-p",
+                        str(port),
+                        f"{USERNAME}@{IP_ADDRESS}",
+                        "echo SSH ready",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+
+                if result.returncode == 0 and "SSH ready" in result.stdout:
+                    return
+
+        except (socket.timeout, ConnectionRefusedError, subprocess.TimeoutExpired):
+            pass
+
+        time.sleep(delay)
+
+    raise RuntimeError(f"SSH not available")
+
+
+def run_command(command: str) -> int:
     """Execute a command inside the RISC-V VM via SSH.
     Uses sshpass for password authentication to connect to the running VM.
     The VM must be accessible on localhost:2222 with root/root credentials."""
 
-    subprocess.run(
+    result = subprocess.run(
         [
             "sshpass",
             "-p",
@@ -144,7 +178,11 @@ def run_command(command: str) -> None:
         ],
         capture_output=True,
         text=True,
+        timeout=300,
+        check=True,
     )
+
+    return result.returncode
 
 
 def _create_input_yaml() -> dict:
