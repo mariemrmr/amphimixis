@@ -26,7 +26,7 @@ def test_e2e_riscv_vm(riscv_vm_run_and_install_packages):
     """End-to-end test for building and profiling on a RISC-V QEMU VM."""
 
     repo_url = TESTING_PROJECT_URL
-    wd_path = tempfile.mkdtemp(prefix="temp_dir")
+    wd_path = tempfile.mkdtemp(prefix="test_workspace_")
     repo_path = Path(wd_path) / "repo"
     command = ["git", "clone", repo_url, repo_path]
     subprocess.run(command, check=True)
@@ -59,6 +59,7 @@ def riscv_vm_run_and_install_packages():
     zip_archive = Path(WORKDIR) / "debian.zip"
     repo_with_image = Path(WORKDIR) / "dqib_riscv64-virt"
     qcow2_file = repo_with_image / "image.qcow2"
+    snapshot_path = Path(WORKDIR) / "snapshot.qcow2"
 
     url = "https://gitlab.com/api/v4/projects/giomasce%2Fdqib/jobs/artifacts/master/download?job=convert_riscv64-virt"
 
@@ -67,9 +68,24 @@ def riscv_vm_run_and_install_packages():
             subprocess.run(["wget", "-O", str(zip_archive), f"{url}"], check=True)
         subprocess.run(["unzip", str(zip_archive), "-d", str(WORKDIR)], check=True)
 
+    subprocess.run(
+        [
+            "qemu-img",
+            "create",
+            "-f",
+            "qcow2",
+            "-b",
+            str(qcow2_file),
+            "-o",
+            "backing_fmt=qcow2",
+            str(snapshot_path),
+        ],
+        check=True,
+    )
+
     kernel = repo_with_image / "kernel"
     initrd = repo_with_image / "initrd"
-    qemu_cmd = [
+    qemu_run = [
         "qemu-system-riscv64",
         "-machine",
         "virt",
@@ -77,10 +93,12 @@ def riscv_vm_run_and_install_packages():
         "rv64",
         "-m",
         "4G",
+        "-smp",
+        "4",
         "-device",
         "virtio-blk-device,drive=hd",
         "-drive",
-        f"file={str(qcow2_file)},if=none,id=hd",
+        f"file={snapshot_path},if=none,id=hd",
         "-device",
         "virtio-net-device,netdev=net",
         "-netdev",
@@ -99,7 +117,7 @@ def riscv_vm_run_and_install_packages():
     ]
 
     process = subprocess.Popen(
-        qemu_cmd,
+        qemu_run,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         stdin=subprocess.DEVNULL,
