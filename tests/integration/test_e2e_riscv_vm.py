@@ -116,9 +116,8 @@ def riscv_vm_run_and_install_packages():
     exit_code = run_command(str(vm_install_packages))
     assert exit_code == 0
 
-    if not os.getenv("CI"):
-        yield process
-        process.terminate()
+    yield process
+    process.terminate()
 
 
 def wait_for_ssh(port: int = 2222, max_retries: int = 30, delay: int = 5) -> None:
