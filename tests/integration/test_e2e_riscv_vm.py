@@ -59,7 +59,6 @@ def riscv_vm_run_and_install_packages():
     zip_archive = Path(WORKDIR) / "debian.zip"
     repo_with_image = Path(WORKDIR) / "dqib_riscv64-virt"
     qcow2_file = repo_with_image / "image.qcow2"
-    snapshot_path = Path(WORKDIR) / "snapshot.qcow2"
 
     url = "https://gitlab.com/api/v4/projects/giomasce%2Fdqib/jobs/artifacts/master/download?job=convert_riscv64-virt"
 
@@ -67,21 +66,6 @@ def riscv_vm_run_and_install_packages():
         if not zip_archive.exists():
             subprocess.run(["wget", "-O", str(zip_archive), f"{url}"], check=True)
         subprocess.run(["unzip", str(zip_archive), "-d", str(WORKDIR)], check=True)
-
-    subprocess.run(
-        [
-            "qemu-img",
-            "create",
-            "-f",
-            "qcow2",
-            "-b",
-            str(qcow2_file),
-            "-o",
-            "backing_fmt=qcow2",
-            str(snapshot_path),
-        ],
-        check=True,
-    )
 
     kernel = repo_with_image / "kernel"
     initrd = repo_with_image / "initrd"
@@ -98,7 +82,7 @@ def riscv_vm_run_and_install_packages():
         "-device",
         "virtio-blk-device,drive=hd",
         "-drive",
-        f"file={snapshot_path},if=none,id=hd",
+        f"file={qcow2_file},if=none,id=hd,snapshot=on",
         "-device",
         "virtio-net-device,netdev=net",
         "-netdev",
