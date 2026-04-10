@@ -10,7 +10,7 @@ platforms:
 
 recipes:
 - id: 1
-  config_flags: "-DCMAKE_BUILD_TYPE=Release -DJSON_BuildTests=ON=ON"
+  config_flags: "-DCMAKE_BUILD_TYPE=Release -DJSON_BuildTests=ON"
   compiler_flags:
     cxx_flags: "-O2"
   toolchain:
